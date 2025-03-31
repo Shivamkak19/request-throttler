@@ -1,0 +1,107 @@
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+// SHIVAM KAK
+// 31 MARCH 2025
+// DUST TASK
+///////////////////////////////////////////////
+// FILE: design.txt
+
+// Design.txt outlines the motivation for the
+// particular design choices of this 
+// implementation of the request-throttler.
+///////////////////////////////////////////////
+
+To start, I decided to implement the 
+request-throttler in golang as opposed to 
+Rust or typescript because I feel the most 
+comfortable working in go for distributed
+infrastructure tasks. 
+
+The design of my request-throttler follows
+the following macro-level architecture: 
+a token bucket rate limiter combined with a 
+priority queue, managed through go's 
+native concurrency mechanisms (goroutines and 
+channels). This architecture enables 
+handling of requests at scale 
+while maintaining the required invariants 
+of priority ordering and FIFO execution.
+The core of the implementation is built 
+around a token bucket algorithm, which is 
+well-suited for rate limiting in distributed 
+systems. Each connection (platform + 
+connection identifier combination) has its 
+own token bucket that fills at a rate 
+determined by the specified rate limit. 
+When a request is made, a token is consumed, 
+and if no tokens are available, the request 
+is queued. This approach naturally handles 
+the rolling window rate limit requirement 
+without needing to track individual 
+request timestamps.
+
+For managing request priorities, I implemented 
+a priority queue using go's container/heap
+package. Requests are sorted first by their 
+niceness value (lower values indicate 
+higher priority) and then by their timestamp 
+to ensure FIFO ordering within the same 
+priority level. This satisfies both invariants 
+specified in the requirements: 
+higher priority requests are always executed 
+before lower priority ones, and for a given 
+priority level, requests follow FIFO order.
+
+The system employs a registry pattern to 
+maintain rate limiters for each connection. 
+This allows multiple workflows and activities 
+to share the same rate limiter for a given 
+connection, even when executed across different 
+goroutines or even different processes. The 
+global registry ensures that rate limits are 
+enforced across all concurrent activities 
+for a particular connection.
+
+To handle concurrency effectively, the 
+implementation uses channels to coordinate 
+between the submission of requests and their 
+execution. Each connection rate limiter runs a 
+dedicated worker goroutine that continuously 
+processes the priority queue as tokens become 
+available. This non-blocking approach allows 
+the system to handle a high volume of 
+concurrent requests efficiently while 
+maintaining proper rate limiting and 
+priority ordering.
+
+For distributed execution across multiple 
+workers (Kubernetes pods), the current 
+implementation would need to be extended with 
+a distributed coordination mechanism. 
+I decided not to perform this extension in
+hopes of keeping this implementation within
+the confines of go primitives, without the
+need of external packages such as go-redis.
+Specifically, while the current approach 
+works well within a single process, 
+a truly distributed solution would require 
+a shared state store like Redis or a 
+dedicated rate limiting service to 
+coordinate token buckets across multiple 
+instances. This would ensure that 
+rate limits are properly enforced even when 
+requests come from different machines.
+The implementation also includes careful 
+consideration of thread safety through the 
+use of mutex locks when accessing shared data 
+structures like the priority queue and 
+token buckets. This ensures that the system 
+behaves correctly even under heavy concurrent 
+usage (on the same machine), 
+preventing race conditions that could 
+lead to rate limit violations or priority 
+inversions. 
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+
