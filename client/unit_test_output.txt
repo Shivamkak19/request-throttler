@@ -1,0 +1,13 @@
+=== RUN   TestBasicThrottle
+--- PASS: TestBasicThrottle (0.01s)
+=== RUN   TestRateLimiting
+First batch duration: 20.178167ms
+Second batch duration: 1.000028667s
+--- PASS: TestRateLimiting (1.02s)
+=== RUN   TestPriorityOrdering
+Execution sequence: [low high low low]
+--- PASS: TestPriorityOrdering (3.12s)
+=== RUN   TestMultipleConnections
+--- PASS: TestMultipleConnections (0.10s)
+PASS
+ok      throttler/client        4.526s
