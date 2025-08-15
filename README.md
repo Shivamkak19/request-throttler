@@ -2,7 +2,7 @@
 
 Consider the following problem statement. 
 
-In this problem, an ingestion infrastructure (called `connectors`) is based on a stateful queue system. This system handles tasks that typically involve pulling data from external platforms and upserting documents to the associated Dust connected data source. These tasks are designed to be idempotent, allowing them to be retried with minimal side effects. Task execution is managed concurrently by workers running in our infrastructure on a service called `connectors-worker`, which operates 4 Kubernetes pods.
+In this problem, an ingestion infrastructure (called `connectors`) is based on a stateful queue system. This system handles tasks that typically involve pulling data from external platforms and upserting documents to the associated connected data source. These tasks are designed to be idempotent, allowing them to be retried with minimal side effects. Task execution is managed concurrently by workers running in our infrastructure on a service called `connectors-worker`, which operates 4 Kubernetes pods.
 
 # Problem
 
@@ -17,7 +17,7 @@ Design a request throttling system to optimize requests rate based on the rate-l
 ## Definitions
 
 - **Platform**: an external API we make requests to using their client libraries.
-- **Workspace**: a Dust workspace connected to a set of platforms.
+- **Workspace**: a workspace connected to a set of platforms.
 - **Connection**: the identity and credentials of a workspace on a platform.
 - **Client**: the client library used to query a platform given a connection.
 - **Request**: a request to a platform using a client for a given connection.
