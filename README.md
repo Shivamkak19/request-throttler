@@ -1,8 +1,8 @@
 # Request throttler
 
-Part of Dust value is to have access to our users’ company data. To achieve that we connect to a variety of platforms (Notion, Google Drive, Slack, Github, Intercom, Confluence, …) and ingest the data from these platform in near real-time.
+Consider the following problem statement. 
 
-Our ingestion infrastructure (called `connectors`) is based on a stateful queue system. This system handles tasks that typically involve pulling data from external platforms and upserting documents to the associated Dust connected data source. These tasks are designed to be idempotent, allowing them to be retried with minimal side effects. Task execution is managed concurrently by workers running in our infrastructure on a service called `connectors-worker`, which operates 4 Kubernetes pods.
+In this problem, an ingestion infrastructure (called `connectors`) is based on a stateful queue system. This system handles tasks that typically involve pulling data from external platforms and upserting documents to the associated Dust connected data source. These tasks are designed to be idempotent, allowing them to be retried with minimal side effects. Task execution is managed concurrently by workers running in our infrastructure on a service called `connectors-worker`, which operates 4 Kubernetes pods.
 
 # Problem
 
@@ -10,7 +10,7 @@ Running activities, we often run into rate-limits which triggers retryable failu
 
 *As an example you may want to have a high priority workflow in charge of fetching most recent data and a low priority workflow in charge of garbage collecting old data.*
 
-We want you to design a request throttling system to optimize requests rate based on the rate-limits we have on each platform for each user which is capable of scheduling requests based on their priorities.
+Design a request throttling system to optimize requests rate based on the rate-limits we have on each platform for each user which is capable of scheduling requests based on their priorities.
 
 # Formalization and assumptions
 
@@ -41,8 +41,6 @@ We want you to design a request throttling system to optimize requests rate base
 # Goal
 
 Design and implement a request throttler in Typescript or Rust based on the formalization and assumptions above that enforce the invariants proposed. 
-
-We propose the following typescript interface to the request throttler to comply to (feel free to port to Rust if you implement in Rust). Your goal is to propose a system design and an implementation for `throttle` 
 
 ```tsx
 interface RateLimit {
@@ -76,5 +74,3 @@ const activity = async (connection: Connection, ...) => {
   // ...
 };
 ```
-
-You are free to rely on the design of your choice to implement `throttle`. Bear in mind that activities are executed concurrently (even for a same connection) on many machines.
